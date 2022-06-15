@@ -1,5 +1,4 @@
 import app
-from helpers.constant_helper import ROLE_USER
 import helpers.function_helper as FunctionHelper
 import repositories.room_repository as RoomRepository
 
@@ -74,5 +73,5 @@ def delete(id):
 
         return FunctionHelper.response_formatter(True, "Successfully Delete Hotel")
     else:
-        return FunctionHelper.response_formatter(False, "Failed Delete Hotel")
+        return FunctionHelper.response_formatter(False, "Failed Delete Hotel, Check if this data is used on your transaction")
 

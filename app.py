@@ -4,9 +4,12 @@ from forms.user_form import *
 from forms.hotel_form import *
 from forms.booking_form import *
 from forms.room_form import *
-from repositories.user_repository import *
+import repositories.user_repository as UserRepository
 import repositories.hotel_repository as HotelRepository
 import repositories.room_repository as RoomRepository
+import repositories.booking_repository as BookingRepository
+
+import helpers.function_helper as FunctionHelper
 from helpers.constant_helper import *
 
 
@@ -40,14 +43,81 @@ def admin_login_route():
 # Admin Booking Route
 @application.route("/admin/booking", methods=['GET', 'POST'])
 def admin_booking_route():
-    list_booking = find_all_user()
-    return render_template("admin/booking/list.html", data=list_booking)
+    response = BookingRepository.find_all()
+    return render_template(ADMIN_BOOKING_LIST_TEMPLATE, data=response['data'])
+
+
+# Admin Booking Create Route
+@application.route("/admin/booking/create", methods=['GET', 'POST'])
+def admin_booking_create_route():
+    form = BookingForm()
+    # Get data user and set user choices
+    form.user_id.choices = FunctionHelper.get_user_choices()
+    # Get data room and set room choices
+    form.room_id.choices =FunctionHelper.get_room_choices()
+
+    if request.method == "POST":
+        if form.validate():
+            response = BookingRepository.create(request.form)
+            if response['success']:
+                flash(response['message'])
+                return redirect("/admin/booking")
+            else:
+                return render_template(ADMIN_BOOKING_CREATE_TEMPLATE, form=form, error_message=response['message'])
+        else:
+            return render_template(ADMIN_BOOKING_CREATE_TEMPLATE, form=form)
+
+    return render_template(ADMIN_BOOKING_CREATE_TEMPLATE, form=form)
+
+
+# Admin Booking Edit Route
+@application.route("/admin/booking/<int:id>", methods=['GET', 'POST'])
+def admin_booking_edit_route(id):
+    form = BookingForm()
+
+    # get booking, user and room data from database
+    booking = BookingRepository.find_one(id)
+    find_user = UserRepository.find_one(booking['data'][1])
+    find_room = RoomRepository.find_one(booking['data'][2])
+    # Get data user and set user choices
+    form.user_id.choices = FunctionHelper.get_user_choices()
+    # Get data room and set room choices
+    form.room_id.choices =FunctionHelper.get_room_choices()
+
+    if request.method == "POST":
+        if form.validate():
+            response = BookingRepository.update(id, request.form)
+            if response['success']:
+                flash(response['message'])
+                return redirect("/admin/booking")
+            else:
+                return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form, error_message=response['message'])
+        else:
+            return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form)
+
+    # set value user and room select
+    form.user_id.data = find_user['data'][0]
+    form.room_id.data = find_room['data'][0]
+
+    return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form, booking=booking['data'])
+
+
+# Admin Booking Delete Route
+@application.route("/admin/booking/<int:id>/delete", methods=['GET'])
+def admin_booking_delete_route(id):
+    response = BookingRepository.delete(id)
+    if response['success']:
+        flash(response['message'])
+    else:
+        flash(response['message'], "error")
+
+    return redirect("/admin/booking")
 
 
 # Admin Report Route
 @application.route("/admin/report", methods=['GET'])
 def admin_report_route():
-    list_report = find_all_user()
+    list_report = []
     return render_template("admin/report/list.html", data=list_report)
 
 
@@ -55,7 +125,7 @@ def admin_report_route():
 @application.route("/admin/hotel", methods=['GET'])
 def admin_hotel_route():
     response = HotelRepository.find_all()
-    return render_template("admin/hotel/list.html", data=response['data'])
+    return render_template(ADMIN_HOTEL_LIST_TEMPLATE, data=response['data'])
 
 
 # Admin Hotel Create Route
@@ -157,7 +227,6 @@ def admin_room_edit_route(id):
         else:
             return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form)
 
-    # Data hotel tidak ter set
     form.hotel_id.data = find_hotel['data'][0]
     return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, room=room['data'])
 
@@ -177,10 +246,60 @@ def admin_room_delete_route(id):
 # Admin User Route
 @application.route("/admin/user", methods=['GET', 'POST'])
 def admin_user_route():
-    list_user = find_all_user()
-    print(list_user)
+    response = UserRepository.find_all_user()
+    return render_template(ADMIN_USER_LIST_TEMPLATE, data=response['data'])
 
-    return render_template("admin/list.html", data=list_user)
+
+# Admin User Create Route
+@application.route("/admin/user/create", methods=['GET', 'POST'])
+def admin_user_create_route():
+    form = UserRegisterForm()
+
+    if request.method == "POST":
+        if form.validate():
+            response = UserRepository.create(request.form)
+            if response['success']:
+                flash(response['message'])
+                return redirect("/admin/user")
+            else:
+                return render_template(ADMIN_USER_CREATE_TEMPLATE, form=form, error_message=response['message'])
+        else:
+            return render_template(ADMIN_USER_CREATE_TEMPLATE, form=form)
+
+    return render_template(ADMIN_USER_CREATE_TEMPLATE, form=form)
+
+
+# Admin User Edit Route
+@application.route("/admin/user/<int:id>", methods=['GET', 'POST'])
+def admin_user_edit_route(id):
+    form = UserRegisterForm()
+    user = UserRepository.find_one(id)
+
+    if request.method == "POST":
+        if form.validate():
+            response = UserRepository.update(id, request.form)
+            if response['success']:
+                flash(response['message'])
+                return redirect("/admin/user")
+            else:
+                return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form, error_message=response['message'])
+        else:
+            return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form)
+
+    return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form, user=user['data'])
+
+
+# Admin User Delete Route
+@application.route("/admin/user/<int:id>/delete", methods=['GET'])
+def admin_user_delete_route(id):
+    response = UserRepository.delete(id)
+    if response['success']:
+        flash(response['message'])
+    else:
+        flash(response['message'], "error")
+
+    return redirect("/admin/user")
+
 
 # End of Admin Route
 
