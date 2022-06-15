@@ -1,6 +1,7 @@
 import bcrypt
 import repositories.user_repository as UserRepository
 import repositories.room_repository as RoomRepository
+from flask import session, redirect
 
 def response_formatter(status, message, data=None):
     response = dict()
@@ -19,8 +20,8 @@ def hash_password(password):
 
 
 def valid_password(input_password, password):
-    hashed_password = hash_password(input_password)
-    return bcrypt.checkpw(hashed_password, password)
+    encode_password = input_password.encode("utf-8")
+    return bcrypt.checkpw(encode_password, hash_password(password))
 
 
 def get_user_choices():
@@ -31,3 +32,5 @@ def get_user_choices():
 def get_room_choices():
     rooms = RoomRepository.find_all()
     return [(room[0], room[2]) for room in rooms['data']]
+
+

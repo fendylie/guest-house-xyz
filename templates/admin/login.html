@@ -19,6 +19,12 @@
                     <h2 class="auth-header-title">Login</h2>
                 </div>
 
+                {% if error_message %}
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
                 <form method="post">
                     {{form.csrf_token}}
 

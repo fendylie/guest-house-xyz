@@ -17,3 +17,6 @@ ADMIN_USER_EDIT_TEMPLATE = "admin/user/edit.html"
 ADMIN_BOOKING_LIST_TEMPLATE = "admin/booking/list.html"
 ADMIN_BOOKING_CREATE_TEMPLATE = "admin/booking/create.html"
 ADMIN_BOOKING_EDIT_TEMPLATE = "admin/booking/edit.html"
+
+ADMIN_REPORT_LIST_TEMPLATE = "admin/report/list.html"
+ADMIN_LOGIN_TEMPLATE = "admin/login.html"
