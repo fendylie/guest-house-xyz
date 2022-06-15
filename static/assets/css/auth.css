@@ -1,0 +1,25 @@
+.auth-body{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-body .auth-wrapper{
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    background-color: white;
+    box-shadow: 1px 0px 12px -1px rgba(0,0,0,0.56);
+}
+
+.auth-body .auth-wrapper .auth-header-wrapper .auth-header-title{
+    margin-bottom: 24px;
+    font-size: 28px;
+}
+
+.auth-body .auth-wrapper .btn-primary{
+    margin-top: 12px;
+    width: 100%;
+}

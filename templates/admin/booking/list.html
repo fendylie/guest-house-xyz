@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Booking - Admin</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src="https://kit.fontawesome.com/75b65e628f.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/fontawesome.min.css">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='assets/css/style.css') }}">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/admin/dashboard">Guest House</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/booking">Booking</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/hotel">Hotel</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/room">Room</a>
+                        </li>
+                        <li class="nav-item me-md-3">
+                            <a class="nav-link" href="/admin/user">User</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-5">
+             <!-- Table List Product-->
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Hotel</th>
+                        <th scope="col">Room</th>
+                        <th scope="col">Person</th>
+                        <th scope="col">Check In</th>
+                        <th scope="col">Check Out</th>
+                        <th scope="col">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data|length > 0 %}
+                        {% for index in range(data|length) %}
+                            <tr>
+                                <th style="vertical-align:middle;" scope="row">{{ index + 1 }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][1] }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][2] }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][3] }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][4] }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][5] }}</th>
+                                <th style="vertical-align:middle;">{{ data[index][6] }}</th>
+                                <th style="vertical-align:middle;">Rp. {{ total_prices[index] }}</th>
+                                <th style="vertical-align:middle;">
+                                    <button class="btn btn-primary" onclick="goToDetail('{{ data[index][0] }}')">Detail</button>
+                                </th>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr style="text-align:center;">
+                            <td colspan="6">No matching record found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script>
+            function goToDetail(email){
+                window.location = "/order/detail?email=" + email
+            }
+        </script>
+    </body>
+</html>

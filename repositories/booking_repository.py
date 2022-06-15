@@ -1,0 +1,33 @@
+import app
+from helpers.constant_helper import ROLE_USER, ROLE_ADMIN
+import helpers.function_helper as FunctionHelper
+
+
+def find_all():
+    app.open_db_connection()
+    data = []
+    sql_query = "SELECT * FROM bookings"
+    app.cursor.execute(sql_query)
+    results = app.cursor.fetchall()
+    app.close_db_connection()
+
+    if results is not None:
+        for item in results:
+            data.append(item)
+
+    return FunctionHelper.response_formatter(True, "Success Fetch Data", data)
+
+
+def find_all_where_room(room_id):
+    app.open_db_connection()
+    data = []
+    sql_query = "SELECT * FROM bookings WHERE room_id = " + str(room_id)
+    app.cursor.execute(sql_query)
+    results = app.cursor.fetchall()
+    app.close_db_connection()
+    if results is not None:
+        for item in results:
+            data.append(item)
+
+    return FunctionHelper.response_formatter(True, "Success Fetch Data", data)
+

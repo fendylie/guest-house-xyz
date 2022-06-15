@@ -1,0 +1,20 @@
+body{
+    background-color: #F9F9FD;
+}
+
+.form-field{
+    margin-bottom: 12px;
+}
+
+table{
+    border: 2px solid black !important;
+}
+
+table th, table td{
+    border-right: 2px solid black !important;
+}
+
+table td:last-child, table td:first-child{
+    width: 1%;
+    white-space: nowrap;
+}
