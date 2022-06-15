@@ -1,7 +1,6 @@
 import app
 from helpers.constant_helper import ROLE_USER, ROLE_ADMIN
 import helpers.function_helper as FunctionHelper
-import bcrypt
 
 
 def find_all_user():
@@ -21,6 +20,16 @@ def find_all_user():
 def find_one(id):
     app.open_db_connection()
     sql_query = "SELECT * FROM users WHERE id = " + str(id)
+    app.cursor.execute(sql_query)
+    result = app.cursor.fetchone()
+    app.close_db_connection()
+
+    return FunctionHelper.response_formatter(True, "Success Fetch Data", result)
+
+
+def find_one_by_email(email):
+    app.open_db_connection()
+    sql_query = "SELECT * FROM users WHERE email = '" + email + "'"
     app.cursor.execute(sql_query)
     result = app.cursor.fetchone()
     app.close_db_connection()
@@ -64,13 +73,28 @@ def update(id, form):
     email = form.get('email')
 
     app.open_db_connection()
-    sql_command = "UPDATE hotels SET name = %s, phone_number = %s, email = %s WHERE id = " + str(id)
+    sql_command = "UPDATE users SET name = %s, phone_number = %s, email = %s WHERE id = " + str(id)
     value = (name, phone_number, email)
     app.cursor.execute(sql_command, value)
     app.conn.commit()
     app.close_db_connection()
 
     return FunctionHelper.response_formatter(True, "Successfully Update User")
+
+
+def update_from_user(id, form):
+    name = form.get('name')
+    phone_number = form.get('phone_number')
+    email = form.get('email')
+
+    app.open_db_connection()
+    sql_command = "UPDATE users SET name = %s, phone_number = %s, email = %s WHERE id = " + str(id)
+    value = (name, phone_number, email)
+    app.cursor.execute(sql_command, value)
+    app.conn.commit()
+    app.close_db_connection()
+
+    return FunctionHelper.response_formatter(True, "Successfully Update Profile")
 
 
 def delete(id):

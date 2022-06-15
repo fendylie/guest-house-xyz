@@ -70,7 +70,7 @@
                         <div class="col-md-10">
                             <fieldset class="form-field">
                                 {{ form.name.label(class_="form-label") }}
-                                {{ form.name(class_="form-control", value=user[1]) }}
+                                {{ form.name(class_="form-control", value=user[2]) }}
                                 {% if form.name.errors %}
                                     <ul class="form-error">
                                         {% for error in form.name.errors %}
@@ -83,7 +83,7 @@
                         <div class="col-md-10">
                             <fieldset class="form-field">
                                 {{ form.email.label(class_="form-label") }}
-                                {{ form.email(class_="form-control", value=user[2]) }}
+                                {{ form.email(class_="form-control", value=user[1]) }}
                                 {% if form.email.errors %}
                                     <ul class="form-error">
                                         {% for error in form.email.errors %}

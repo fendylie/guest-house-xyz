@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex align-items-center justify-content-between mt-4" style="margin-bottom: 20px;">
+        <h2 style="text-align: center;margin: 0;">Your Booking</h2>
+    </div>
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Hotel</th>
+                <th scope="col">Room</th>
+                <th scope="col">Person</th>
+                <th scope="col">Check In</th>
+                <th scope="col">Check Out</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data|length > 0 %}
+                {% for index in range(data|length) %}
+                    <tr>
+                        <td style="vertical-align:middle;" scope="row">{{ index + 1 }}</td>
+                        <td style="vertical-align:middle;">{{ data[index][9] }}</td>
+                        <td style="vertical-align:middle;">{{ data[index][7] }}</td>
+                        <td style="vertical-align:middle;">{{ data[index][3] }}</td>
+                        <td style="vertical-align:middle;">{{ data[index][4] }}</td>
+                        <td style="vertical-align:middle;">{{ data[index][5] }}</td>
+                        <td style="vertical-align:middle;">
+                            <button id="delete-modal" data-id="{{ data[index][0] }}" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr style="text-align:center;">
+                    <td colspan="8">No matching record found</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal delete-->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                Are you sure want to delete this data?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="deleteData()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var dataId;
+    $(document).on("click", "#delete-modal", function () {
+        dataId = $(this).data('id');
+    });
+
+    function deleteData(){
+        window.location = "/your-booking/" + dataId + "/delete"
+    }
+</script>
+
+{% endblock %}

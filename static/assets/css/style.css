@@ -18,3 +18,12 @@ table td:last-child, table td:first-child{
     width: 1%;
     white-space: nowrap;
 }
+
+.card .fa-star{
+  color: #ffe51f;
+  margin-right: 6px;
+}
+
+.carousel-custom{
+    height: 480px;
+}
