@@ -94,10 +94,14 @@ def admin_login_route():
     if request.method == "POST":
         # validasi form
         if form.validate():
+            # call api login admin
             response = AuthRepository.login_admin(request.form)
+            # cek apakah user ada atau tidak
             if response['success']:
+                # set session email dan role
                 session['email'] = response['data'][1]
                 session['role'] = "ADMIN"
+                # redirect ke booking page
                 return redirect("/admin/booking")
             else:
                 return render_template(ADMIN_LOGIN_TEMPLATE, form=form, error_message=response['message'])
@@ -123,8 +127,11 @@ def admin_report_route():
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # get report from database
     response = ReportRepository.find_all()
+    # get user from database
     users = FunctionHelper.get_user_choices()
+    # set user selected if has on url params
     args = request.args
     selected_user = args.get("user") if args.get("user") else "0"
 
@@ -148,6 +155,7 @@ def admin_report_export_route():
 
     # get report from database
     response = ReportRepository.find_all()
+    # get user from database
     users = FunctionHelper.get_user_choices()
 
     # set user selected if has on url params
@@ -187,6 +195,7 @@ def admin_booking_route():
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # get data booking dari database
     response = BookingRepository.find_all()
     return render_template(ADMIN_BOOKING_LIST_TEMPLATE, data=response['data'])
 
@@ -205,9 +214,13 @@ def admin_booking_create_route():
     form.room_id.choices =FunctionHelper.get_room_choices()
 
     if request.method == "POST":
+        # validasi form
         if form.validate():
+            # call create booking api
             response = BookingRepository.create(request.form)
+            # cek apakah success atau tidak
             if response['success']:
+                # redirect dan send flash message
                 flash(response['message'])
                 return redirect("/admin/booking")
             else:
@@ -229,6 +242,7 @@ def admin_booking_edit_route(id):
 
     # get booking, user and room data from database
     booking = BookingRepository.find_one(id)
+    # call api room dan user berdasarkan data booking
     find_user = UserRepository.find_one(booking['data'][1])
     find_room = RoomRepository.find_one(booking['data'][2])
     # Get data user and set user choices
@@ -261,7 +275,9 @@ def admin_booking_delete_route(id):
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api delete booking
     response = BookingRepository.delete(id)
+    # cek apakah delete success atau tidak
     if response['success']:
         flash(response['message'])
     else:
@@ -292,8 +308,11 @@ def admin_hotel_create_route():
 
     if request.method == "POST":
         if form.validate():
+            # call api create hotel
             response = HotelRepository.create(request.form)
+            # cek apakah create berhasil atau tidak
             if response['success']:
+                # jika berhasil redirect ke hotel dan kirim flash message
                 flash(response['message'])
                 return redirect("/admin/hotel")
             else:
@@ -312,10 +331,13 @@ def admin_hotel_edit_route(id):
         return redirect("/admin/login")
 
     form = HotelForm()
+    # get hotel base on id from database
     hotel = HotelRepository.find_one(id)
 
     if request.method == "POST":
+        # validasi form
         if form.validate():
+            # call api update hotel
             response = HotelRepository.update(id, request.form)
             if response['success']:
                 flash(response['message'])
@@ -335,6 +357,7 @@ def admin_hotel_delete_route(id):
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api delete hotel
     response = HotelRepository.delete(id)
     if response['success']:
         flash(response['message'])
@@ -351,6 +374,7 @@ def admin_room_route():
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api get room from database
     response = RoomRepository.find_all()
     return render_template("admin/room/list.html", data=response['data'])
 
@@ -363,11 +387,13 @@ def admin_room_create_route():
         return redirect("/admin/login")
 
     form = RoomForm()
+    # get data hotel dan set ke choices
     hotels = HotelRepository.find_all()
     form.hotel_id.choices =  [(hotel[0], hotel[1]) for hotel in hotels['data']]
 
     if request.method == "POST":
         if form.validate():
+            # call api create room
             response = RoomRepository.create(request.form)
             if response['success']:
                 flash(response['message'])
@@ -388,13 +414,17 @@ def admin_room_edit_route(id):
         return redirect("/admin/login")
 
     form = RoomForm()
+    # get room by id
     room = RoomRepository.find_one(id)
+
+    # get data hotel dan set ke hotel choices
     hotels = HotelRepository.find_all()
     find_hotel = HotelRepository.find_one(room['data'][1])
     form.hotel_id.choices = [(hotel[0], hotel[1]) for hotel in hotels['data']]
 
     if request.method == "POST":
         if form.validate():
+            # call api update room
             response = RoomRepository.update(id, request.form)
             if response['success']:
                 flash(response['message'])
@@ -415,6 +445,7 @@ def admin_room_delete_route(id):
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api delete
     response = RoomRepository.delete(id)
     if response['success']:
         flash(response['message'])
@@ -431,6 +462,7 @@ def admin_user_route():
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api get user
     response = UserRepository.find_all_user()
     return render_template(ADMIN_USER_LIST_TEMPLATE, data=response['data'])
 
@@ -445,7 +477,9 @@ def admin_user_create_route():
     form = UserRegisterForm()
 
     if request.method == "POST":
+        # validasi form
         if form.validate():
+            # call api create user
             response = UserRepository.create(request.form)
             if response['success']:
                 flash(response['message'])
@@ -466,10 +500,13 @@ def admin_user_edit_route(id):
         return redirect("/admin/login")
 
     form = UserProfileForm()
+    # get user by id
     user = UserRepository.find_one(id)
 
     if request.method == "POST":
+        # validasi form
         if form.validate():
+            # call api update user
             response = UserRepository.update(id, request.form)
             if response['success']:
                 flash(response['message'])
@@ -489,6 +526,7 @@ def admin_user_delete_route(id):
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
+    # call api delete user
     response = UserRepository.delete(id)
     if response['success']:
         flash(response['message'])
@@ -510,8 +548,10 @@ def user_login_route():
 
     if request.method == "POST":
         if form.validate():
+            # call api user login
             response = AuthRepository.login_user(request.form)
             if response['success']:
+                # jika success set session email dan role
                 session['email'] = response['data'][1]
                 session['role'] = "USER"
                 return redirect("/")
@@ -520,7 +560,6 @@ def user_login_route():
         else:
             return render_template(USER_LOGIN_TEMPLATE, form=form)
 
-    form = UserLoginForm()
     return render_template("user/login.html", form=form)
 
 
@@ -534,6 +573,7 @@ def user_register_route():
     form = UserRegisterForm()
 
     if request.method == "POST":
+        # form validasi
         if form.validate():
             # create user from database
             response = UserRepository.create(request.form)
@@ -551,6 +591,7 @@ def user_register_route():
 # Index Route
 @application.route("/", methods=['GET'])
 def index():
+    # get hotel data from database
     hotels = HotelRepository.find_all()
     return render_template(USER_HOME_TEMPLATE, hotel=hotels['data'])
 
@@ -562,7 +603,9 @@ def user_booking_route():
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
+    # get user by email
     get_user = UserRepository.find_one_by_email(session['email'])['data']
+    # get booking by user
     bookings = BookingRepository.find_all_by_user(get_user[0])
     return render_template(USER_BOOKING_TEMPLATE, data=bookings['data'])
 
@@ -574,6 +617,7 @@ def user_booking_delete_route(id):
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
+    # call api booking delete
     response = BookingRepository.delete(id)
     if response['success']:
         flash(response['message'])
@@ -600,6 +644,7 @@ def user_booking_hotel_route(id):
     if request.method == "POST":
         # validasi flask form
         if form.validate():
+            # call api create booking
             response = BookingRepository.create_from_user(request.form, get_user[0])
             if response['success']:
                 flash(response['message'])
@@ -620,10 +665,12 @@ def user_profile_route():
         return redirect("/login")
 
     form = UserProfileForm()
+    # get user by email from database
     user = UserRepository.find_one_by_email(session.get("email"))
 
     if request.method == "POST":
         if form.validate():
+            # call api update user
             response = UserRepository.update_from_user(user['data'][0], request.form)
             if response['success']:
                 flash(response['message'])
