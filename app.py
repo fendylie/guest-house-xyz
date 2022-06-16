@@ -245,7 +245,7 @@ def admin_booking_edit_route(id):
             else:
                 return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form, error_message=response['message'])
         else:
-            return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form)
+            return render_template(ADMIN_BOOKING_EDIT_TEMPLATE, form=form, booking=booking['data'])
 
     # set value user and room select
     form.user_id.data = find_user['data'][0]
@@ -323,7 +323,7 @@ def admin_hotel_edit_route(id):
             else:
                 return render_template(ADMIN_HOTEL_EDIT_TEMPLATE, form=form, error_message=response['message'])
         else:
-            return render_template(ADMIN_HOTEL_EDIT_TEMPLATE, form=form)
+            return render_template(ADMIN_HOTEL_EDIT_TEMPLATE, form=form, hotel=hotel['data'])
 
     return render_template(ADMIN_HOTEL_EDIT_TEMPLATE, form=form, hotel=hotel['data'])
 
@@ -402,7 +402,7 @@ def admin_room_edit_route(id):
             else:
                 return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, error_message=response['message'])
         else:
-            return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form)
+            return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, room=room['data'])
 
     form.hotel_id.data = find_hotel['data'][0]
     return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, room=room['data'])
@@ -535,6 +535,7 @@ def user_register_route():
 
     if request.method == "POST":
         if form.validate():
+            # create user from database
             response = UserRepository.create(request.form)
             if response['success']:
                 flash(response['message'])
