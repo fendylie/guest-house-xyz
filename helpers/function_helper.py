@@ -43,3 +43,4 @@ def get_room_choices_by_hotel(id):
     return [(room[0], room[2]) for room in rooms['data']]
 
 
+

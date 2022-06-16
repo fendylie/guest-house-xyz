@@ -91,6 +91,7 @@
                                 <td style="vertical-align:middle;">{{ data[index][3] }}</td>
                                 <td style="vertical-align:middle;">
                                     <button class="btn btn-primary" onclick="goToDetail('{{ data[index][0] }}')">Edit</button>
+                                    <a type="button" class="btn btn-info" href="/admin/user/blast/{{ data[index][0] }}">Blast</a>
                                     <button id="delete-modal" data-id="{{ data[index][0] }}" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
                                 </td>
                             </tr>

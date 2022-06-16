@@ -13,10 +13,14 @@ import repositories.auth_repository as AuthRepository
 
 import helpers.function_helper as FunctionHelper
 from helpers.constant_helper import *
-
+import pdfkit
+import os
 
 application = Flask(__name__)
 application.secret_key = "loremipsum"
+application.config['PDF_FOLDER'] = os.path.realpath('.') + "/static/pdf"
+application.config['TEMPLATE_FOLDER'] = os.path.realpath('.') + "/templates"
+
 conn = cursor = None
 
 
@@ -78,7 +82,19 @@ def admin_report_route():
         return redirect("/admin/login")
 
     response = ReportRepository.find_all()
-    return render_template(ADMIN_REPORT_LIST_TEMPLATE, data=response['data'])
+    users = FunctionHelper.get_user_choices()
+    args = request.args
+    selected_user = args.get("user")
+
+    if selected_user:
+        temp_data = []
+        for user in response['data']:
+            if str(user[0]) == str(selected_user):
+                temp_data.append(user)
+
+        response['data'] = temp_data
+
+    return render_template(ADMIN_REPORT_LIST_TEMPLATE, data=response['data'], users=users)
 
 
 # Admin Booking Route
@@ -383,7 +399,20 @@ def admin_user_delete_route(id):
     return redirect("/admin/user")
 
 
+# Admin User Delete Route
+@application.route("/admin/user/export", methods=['GET'])
+def admin_user_export_route():
+    # export data user to pdf
+    if not session.get("email") and session.get("role") != "ADMIN":
+        return redirect("/admin/login")
+
+    htmlfile = application.config['TEMPLATE_FOLDER'] + '/admin/user/list.html'
+    pdffile = application.config['PDF_FOLDER'] + '/user/list.pdf'
+    pdfkit.from_file(htmlfile, pdffile)
+    return redirect("/static/pdf/user/list.pdf")
+
 # End of Admin Route
+# TODO: pdf dan blast email belum
 
 
 # User Route

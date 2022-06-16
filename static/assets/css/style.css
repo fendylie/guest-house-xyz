@@ -12,6 +12,7 @@ table{
 
 table th, table td{
     border-right: 2px solid black !important;
+    white-space: nowrap;
 }
 
 table td:last-child, table td:first-child{
