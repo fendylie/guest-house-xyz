@@ -1,6 +1,6 @@
 import pymysql.cursors
-import requests
-from flask import Flask, render_template, request, redirect, session, flash, url_for
+from flask import Flask, render_template, request, redirect, session, flash
+from flask_mail import Mail, Message
 from forms.user_form import *
 from forms.hotel_form import *
 from forms.booking_form import *
@@ -14,17 +14,50 @@ import repositories.auth_repository as AuthRepository
 
 import helpers.function_helper as FunctionHelper
 from helpers.constant_helper import *
-import pdfkit
 import os
 import convertapi
 
 application = Flask(__name__)
 application.secret_key = "loremipsum"
-application.config['PDF_FOLDER'] = os.path.realpath('.') + "/static/pdf"
-application.config['TEMPLATE_FOLDER'] = os.path.realpath('.') + "/templates"
+
+mail_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": 'crazydefense2777@gmail.com',
+    "MAIL_PASSWORD": 'auoyrrnzphngzwra'
+}
+
+application.config.update(mail_settings)
+mail = Mail(application)
 
 conn = cursor = None
 
+# for sending email
+@application.route("/sendemail/<int:user_id>")
+def send_email(user_id):
+    # read user
+    user = UserRepository.find_one(user_id);
+
+    # make message email
+    msg = Message(
+        'LIMITED OFFERING',
+        sender ='crazydefense2777@gmail.com',
+        recipients = [user["data"][1]]
+    )
+
+    # render template to email
+    msg.html  = render_template(
+        EMAIL_TEMPLATE,
+        title="Check this offering right now " + user["data"][2],
+        paragraph="Book Guest Houses Online. No reservation costs. Great rates. Get Instant Confirmation. Read Real Guest Reviews. No Booking Fees. Best Price Guarantee. 24/7 Customer Service."
+    )
+
+    # send email
+    mail.send(msg)
+
+    flash("Successfull send email to " + user["data"][1])
+    return redirect("/admin/user")
 
 # open db connection
 def open_db_connection():
@@ -432,7 +465,7 @@ def admin_user_edit_route(id):
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
-    form = UserRegisterForm()
+    form = UserProfileForm()
     user = UserRepository.find_one(id)
 
     if request.method == "POST":
@@ -444,7 +477,7 @@ def admin_user_edit_route(id):
             else:
                 return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form, error_message=response['message'])
         else:
-            return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form)
+            return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form, user=user['data'])
 
     return render_template(ADMIN_USER_EDIT_TEMPLATE, form=form, user=user['data'])
 
