@@ -64,7 +64,7 @@ def create(form):
     app.conn.commit()
     app.close_db_connection()
 
-    return FunctionHelper.response_formatter(True, "Successfully Create Hotel")
+    return FunctionHelper.response_formatter(True, "Successfully Create User")
 
 
 def update(id, form):

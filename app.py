@@ -1,5 +1,6 @@
 import pymysql.cursors
-from flask import Flask, render_template, request, redirect, session, flash
+import requests
+from flask import Flask, render_template, request, redirect, session, flash, url_for
 from forms.user_form import *
 from forms.hotel_form import *
 from forms.booking_form import *
@@ -15,6 +16,7 @@ import helpers.function_helper as FunctionHelper
 from helpers.constant_helper import *
 import pdfkit
 import os
+import convertapi
 
 application = Flask(__name__)
 application.secret_key = "loremipsum"
@@ -24,6 +26,7 @@ application.config['TEMPLATE_FOLDER'] = os.path.realpath('.') + "/templates"
 conn = cursor = None
 
 
+# open db connection
 def open_db_connection():
     global conn, cursor
     conn = pymysql.connect(host="localhost", user="root", password="", db="guest-house-xyz")
@@ -47,12 +50,16 @@ def admin_index_route():
 # Admin Login Route
 @application.route("/admin/login", methods=['GET', 'POST'])
 def admin_login_route():
+    # check user is admin and have session login
     if session.get("email") and session.get("role") == "ADMIN":
         return redirect("/admin/booking")
 
+    # initial flask form
     form = UserLoginForm()
 
+    # check request method is POST
     if request.method == "POST":
+        # validasi form
         if form.validate():
             response = AuthRepository.login_admin(request.form)
             if response['success']:
@@ -70,6 +77,7 @@ def admin_login_route():
 # Logout Route
 @application.route("/admin/logout", methods=['GET', 'POST'])
 def admin_logout_route():
+    # admin logout and remove session
     session.pop("email", None)
     session.pop("role", None)
     return redirect("/admin/login")
@@ -78,15 +86,16 @@ def admin_logout_route():
 # Admin Report Route
 @application.route("/admin/report", methods=['GET'])
 def admin_report_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
     response = ReportRepository.find_all()
     users = FunctionHelper.get_user_choices()
     args = request.args
-    selected_user = args.get("user")
+    selected_user = args.get("user") if args.get("user") else "0"
 
-    if selected_user:
+    if selected_user != "0":
         temp_data = []
         for user in response['data']:
             if str(user[0]) == str(selected_user):
@@ -94,12 +103,54 @@ def admin_report_route():
 
         response['data'] = temp_data
 
-    return render_template(ADMIN_REPORT_LIST_TEMPLATE, data=response['data'], users=users)
+    return render_template(ADMIN_REPORT_LIST_TEMPLATE, data=response['data'], users=users, selected_user=int(selected_user))
+
+
+# Admin Report Export Route
+@application.route("/admin/report/export", methods=['GET', 'POST'])
+def admin_report_export_route():
+    # check user is admin and have session login
+    if not session.get("email") and session.get("role") != "ADMIN":
+        return redirect("/admin/login")
+
+    # get report from database
+    response = ReportRepository.find_all()
+    users = FunctionHelper.get_user_choices()
+
+    # set user selected if has on url params
+    args = request.args
+    selected_user = args.get("user") if args.get("user") else "0"
+
+    if selected_user != "0":
+        temp_data = []
+        for user in response['data']:
+            if str(user[0]) == str(selected_user):
+                temp_data.append(user)
+
+        response['data'] = temp_data
+
+    # convertapi secret key
+    convertapi.api_secret = 'HeQOuUbO4wL08bTa'
+
+    # membuat file temp untuk menampung render template
+    with open("temp.html", "w") as fo:
+        fo.write(render_template(ADMIN_REPORT_LIST_TEMPLATE, data=response['data'], users=users, selected_user=int(selected_user)))
+
+    # convert temp html to pdf using convertapi
+    convertapi.convert('pdf', {
+        'File': os.path.realpath('.') + '/temp.html'
+    }, from_format='html').save_files(os.path.realpath('.') + '/static/pdf/report/report.pdf')
+
+    # remove file temp
+    os.remove(os.path.realpath('.') + '/temp.html')
+
+    return redirect("/admin/report")
 
 
 # Admin Booking Route
 @application.route("/admin/booking", methods=['GET', 'POST'])
 def admin_booking_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -110,6 +161,7 @@ def admin_booking_route():
 # Admin Booking Create Route
 @application.route("/admin/booking/create", methods=['GET', 'POST'])
 def admin_booking_create_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -136,6 +188,7 @@ def admin_booking_create_route():
 # Admin Booking Edit Route
 @application.route("/admin/booking/<int:id>", methods=['GET', 'POST'])
 def admin_booking_edit_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -171,6 +224,7 @@ def admin_booking_edit_route(id):
 # Admin Booking Delete Route
 @application.route("/admin/booking/<int:id>/delete", methods=['GET'])
 def admin_booking_delete_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -186,6 +240,7 @@ def admin_booking_delete_route(id):
 # Admin Hotel Route
 @application.route("/admin/hotel", methods=['GET'])
 def admin_hotel_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -196,6 +251,7 @@ def admin_hotel_route():
 # Admin Hotel Create Route
 @application.route("/admin/hotel/create", methods=['GET', 'POST'])
 def admin_hotel_create_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -218,6 +274,7 @@ def admin_hotel_create_route():
 # Admin Hotel Edit Route
 @application.route("/admin/hotel/<int:id>", methods=['GET', 'POST'])
 def admin_hotel_edit_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -241,6 +298,7 @@ def admin_hotel_edit_route(id):
 # Admin Hotel Delete Route
 @application.route("/admin/hotel/<int:id>/delete", methods=['GET'])
 def admin_hotel_delete_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -256,6 +314,7 @@ def admin_hotel_delete_route(id):
 # Admin Room Route
 @application.route("/admin/room", methods=['GET', 'POST'])
 def admin_room_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -266,6 +325,7 @@ def admin_room_route():
 # Admin Room Create Route
 @application.route("/admin/room/create", methods=['GET', 'POST'])
 def admin_room_create_route():
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -290,6 +350,7 @@ def admin_room_create_route():
 # Admin Room Edit Route
 @application.route("/admin/room/<int:id>", methods=['GET', 'POST'])
 def admin_room_edit_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -317,6 +378,7 @@ def admin_room_edit_route(id):
 # Admin Hotel Delete Route
 @application.route("/admin/room/<int:id>/delete", methods=['GET'])
 def admin_room_delete_route(id):
+    # check user is admin and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -332,6 +394,7 @@ def admin_room_delete_route(id):
 # Admin User Route
 @application.route("/admin/user", methods=['GET', 'POST'])
 def admin_user_route():
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -342,6 +405,7 @@ def admin_user_route():
 # Admin User Create Route
 @application.route("/admin/user/create", methods=['GET', 'POST'])
 def admin_user_create_route():
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -364,6 +428,7 @@ def admin_user_create_route():
 # Admin User Edit Route
 @application.route("/admin/user/<int:id>", methods=['GET', 'POST'])
 def admin_user_edit_route(id):
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -387,6 +452,7 @@ def admin_user_edit_route(id):
 # Admin User Delete Route
 @application.route("/admin/user/<int:id>/delete", methods=['GET'])
 def admin_user_delete_route(id):
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "ADMIN":
         return redirect("/admin/login")
 
@@ -399,26 +465,11 @@ def admin_user_delete_route(id):
     return redirect("/admin/user")
 
 
-# Admin User Delete Route
-@application.route("/admin/user/export", methods=['GET'])
-def admin_user_export_route():
-    # export data user to pdf
-    if not session.get("email") and session.get("role") != "ADMIN":
-        return redirect("/admin/login")
-
-    htmlfile = application.config['TEMPLATE_FOLDER'] + '/admin/user/list.html'
-    pdffile = application.config['PDF_FOLDER'] + '/user/list.pdf'
-    pdfkit.from_file(htmlfile, pdffile)
-    return redirect("/static/pdf/user/list.pdf")
-
-# End of Admin Route
-# TODO: pdf dan blast email belum
-
-
 # User Route
 # User Login Route
 @application.route("/login", methods=['GET', 'POST'])
 def user_login_route():
+    # check user is user and have session login
     if session.get("email") and session.get("role") == "USER":
         return redirect("/")
 
@@ -443,6 +494,7 @@ def user_login_route():
 # User Register Route
 @application.route("/register", methods=['GET', 'POST'])
 def user_register_route():
+    # check user is user and have session login
     if session.get("email") and session.get("role") == "USER":
         return redirect("/")
 
@@ -472,6 +524,7 @@ def index():
 # User Booking Route
 @application.route("/your-booking", methods=['GET'])
 def user_booking_route():
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
@@ -483,6 +536,7 @@ def user_booking_route():
 # User Booking Delete Route
 @application.route("/your-booking/<int:id>/delete", methods=['GET'])
 def user_booking_delete_route(id):
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
@@ -498,6 +552,7 @@ def user_booking_delete_route(id):
 # User Booking Hotel Route
 @application.route("/booking-hotel/<int:id>", methods=['GET', 'POST'])
 def user_booking_hotel_route(id):
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
@@ -526,6 +581,7 @@ def user_booking_hotel_route(id):
 # User Profile Route
 @application.route("/profile", methods=['GET', 'POST'])
 def user_profile_route():
+    # check user is user and have session login
     if not session.get("email") and session.get("role") != "USER":
         return redirect("/login")
 
@@ -549,6 +605,7 @@ def user_profile_route():
 # Logout Route
 @application.route("/logout", methods=['GET', 'POST'])
 def user_logout_route():
+    # user logout and remove session
     session.pop("email", None)
     session.pop("role", None)
     return redirect("/login")

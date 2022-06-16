@@ -21,7 +21,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="/admin/booking">Booking</a>
+                            <a class="nav-link" href="/admin/booking">Booking</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/hotel">Hotel</a>
@@ -29,7 +29,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/room">Room</a>
                         </li>
-                        <li class="nav-item me-md-3">
+                        <li class="nav-item">
                             <a class="nav-link"  href="/admin/user">User</a>
                         </li>
                         <li class="nav-item me-md-3">
@@ -52,15 +52,23 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <select id="select-filter-user" class="form-select mb-4">
-                        <option value="all">All</option>
+                        <option value="0">All User</option>
                         {% if users|length > 0 %}
                             {% for index in range(users|length) %}
-                                <option value="{{ users[index][0] }}">{{ users[index][1] }}</option>
+                                {% if users[index][0] == selected_user %}
+                                    <option value="{{ users[index][0] }}" selected>{{ users[index][1] }}</option>
+                                {% else %}
+                                    <option value="{{ users[index][0] }}">{{ users[index][1] }}</option>
+                                {% endif %}
                             {% endfor %}
                         {% endif %}
                     </select>
+                </div>
+
+                <div class="col-md-9 text-end">
+                    <button class="btn btn-primary" onclick="window.location = '/admin/report/export'">Export</button>
                 </div>
             </div>
 
