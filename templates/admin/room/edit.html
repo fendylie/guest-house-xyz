@@ -125,7 +125,7 @@
                         <div class="col-md-10">
                             <fieldset class="form-field">
                                 {{ form.description.label(class_="form-label") }}
-                                {{ form.description(class_="form-control", value=room[5]) }}
+                                {{ form.description(class_="form-control") }}
                                 {% if form.description.errors %}
                                     <ul class="form-error">
                                         {% for error in form.description.errors %}

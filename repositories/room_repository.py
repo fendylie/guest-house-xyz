@@ -67,7 +67,7 @@ def update(id, form):
     description = form.get('description')
 
     app.open_db_connection()
-    sql_command = "UPDATE hotels SET name = %s, hotel_id = %s, max_person = %s, price = %s, description = %s WHERE id = " + str(id)
+    sql_command = "UPDATE rooms SET name = %s, hotel_id = %s, max_person = %s, price = %s, description = %s WHERE id = " + str(id)
     value = (name, hotel_id, max_person, price, description)
     app.cursor.execute(sql_command, value)
     app.conn.commit()

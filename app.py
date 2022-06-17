@@ -422,6 +422,10 @@ def admin_room_edit_route(id):
     find_hotel = HotelRepository.find_one(room['data'][1])
     form.hotel_id.choices = [(hotel[0], hotel[1]) for hotel in hotels['data']]
 
+    # set hotel and description data
+    form.hotel_id.data = find_hotel['data'][0]
+    form.description.data = room['data'][5]
+
     if request.method == "POST":
         if form.validate():
             # call api update room
@@ -434,7 +438,6 @@ def admin_room_edit_route(id):
         else:
             return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, room=room['data'])
 
-    form.hotel_id.data = find_hotel['data'][0]
     return render_template(ADMIN_ROOM_EDIT_TEMPLATE, form=form, room=room['data'])
 
 
